@@ -13,25 +13,35 @@ def add_test_data():
         db_authors.add_all(users)
         db_authors.commit()
 
+        user1 = db_authors.query(User).filter(User.login == 'user1').first()
+        user2 = db_authors.query(User).filter(User.login == 'user2').first()
+
         blogs = [
-            Blog(owner_id=1, name='First Blog', description='Blog for user1'),
-            Blog(owner_id=2, name='Second Blog', description='Blog for user2')
+            Blog(owner_id=user1.id, name='First Blog', description='Blog for user1'),
+            Blog(owner_id=user2.id, name='Second Blog', description='Blog for user2')
         ]
         db_authors.add_all(blogs)
         db_authors.commit()
 
+        blog1 = db_authors.query(Blog).filter(Blog.owner_id == user1.id).first()
+        blog2 = db_authors.query(Blog).filter(Blog.owner_id == user2.id).first()
+
         posts = [
-            Post(header='Hello World', text='First post content', author_id=1, blog_id=1),
-            Post(header='Second Post', text='Another post', author_id=2, blog_id=2)
+            Post(header='Hello World', text='First post content', author_id=user1.id, blog_id=blog1.id),
+            Post(header='Second Post', text='Another post', author_id=user2.id, blog_id=blog2.id)
         ]
         db_authors.add_all(posts)
         db_authors.commit()
 
         print("Данные добавлены в authors_db!")
 
+        post1 = db_authors.query(Post).filter(Post.author_id == user1.id).first()
+        post2 = db_authors.query(Post).filter(Post.author_id == user2.id).first()
+
     except Exception as e:
         print(f"Ошибка при добавлении данных в authors_db: {e}")
         db_authors.rollback()
+        return
     finally:
         db_authors.close()
 
@@ -61,9 +71,10 @@ def add_test_data():
         login_event = db_tech.query(EventType).filter(EventType.name == 'login').first()
 
         logs = [
-            Log(datetime=datetime.now(), user_id=1, space_type_id=post_space.id, event_type_id=comment_event.id),
-            Log(datetime=datetime.now(), user_id=2, space_type_id=post_space.id, event_type_id=comment_event.id),
-            Log(datetime=datetime.now(), user_id=1, space_type_id=global_space.id, event_type_id=login_event.id)
+            Log(datetime=datetime.now(), user_id=user1.id, space_type_id=post1.id, event_type_id=comment_event.id),
+            Log(datetime=datetime.now(), user_id=user2.id, space_type_id=post2.id, event_type_id=comment_event.id),
+            Log(datetime=datetime.now(), user_id=user1.id, space_type_id=global_space.id, event_type_id=login_event.id),
+            Log(datetime=datetime.now(), user_id=user2.id, space_type_id=global_space.id, event_type_id=login_event.id)
         ]
         db_tech.add_all(logs)
         db_tech.commit()
